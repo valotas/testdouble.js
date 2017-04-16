@@ -1,4 +1,4 @@
-export type TestDouble = Function;
+export type TestDouble<O> = (...args: any[]) => O;
 
 export type DoubledObjectWithKey<Key extends string> = {};
 
@@ -11,7 +11,7 @@ export interface TestdoubleConfig {
 }
 export function config(config: TestdoubleConfig): void;
 
-declare function functionDouble(name?: string): TestDouble;
+declare function functionDouble<O>(name?: string): TestDouble<O>;
 export { functionDouble as function };
 
 // When passed class or constructor function
@@ -23,18 +23,20 @@ export function object<Key extends string>(props: Key[]): DoubledObjectWithKey<K
 // When passed general object
 export function object<T>(object: T): DoubledObject<T>;
 
-export interface Stubber {
-  thenReturn(...args: any[]): TestDouble;
-  thenDo(f: Function): TestDouble;
-  thenThrow(e: Error): TestDouble;
-  thenResolve(v: any): TestDouble;
-  thenReject(e: Error): TestDouble;
-  thenCallback(...args: any[]): TestDouble;
+type PossiblePromise<O> = O | Promise<O>;
+
+export interface Stubber<O> {
+  thenReturn(out: O): TestDouble<O>;
+  thenDo(f: (I) => O | void): TestDouble<O>;
+  thenThrow(e: Error): TestDouble<O>;
+  thenResolve(v: any): TestDouble<O>;
+  thenReject(e: Error): TestDouble<O>;
+  thenCallback(...args: any[]): TestDouble<O>;
 }
 
 export function callback(...args: any[]): void;
 
-export function when(...args: any[]): Stubber;
+export function when<O>(td: TestDouble<O>): Stubber<O>;
 
 export interface Matchers {
   anything(): any;
@@ -76,4 +78,4 @@ export interface Explanation {
   description: string;
 }
 
-export function explain(f: TestDouble): Explanation;
+export function explain(f: TestDouble<any>): Explanation;
